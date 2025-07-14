@@ -7,7 +7,12 @@
  const bodyParser = require('body-parser'); // body-parser
  const cors = require('cors'); // cors
  app.use(bodyParser.json()); // body-parser
- app.use(cors()); // cors
+ app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+ })); // cors
 const PORT=process.env.PORT || 5000;
 
 const userRoutes=require('./routes/userRoute');
