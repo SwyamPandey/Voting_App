@@ -26,6 +26,7 @@ function VotingPage() {
 
   const handleVote = async (candidateId) => {
     try {
+      console.log(candidateId);
       await candidateAPI.vote(candidateId);
       setMessage('Vote cast successfully!');
       setTimeout(() => {
