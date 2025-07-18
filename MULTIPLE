@@ -1,0 +1,222 @@
+// src/components/AdminDashboard.js
+import React, { useEffect, useState } from 'react';
+import { electionAPI } from '../services/api';
+
+function AdminDashboard() {
+  const [elections, setElections] = useState([]);
+  const [selectedElection, setSelectedElection] = useState('');
+  const [candidates, setCandidates] = useState([]);
+  const [candidateData, setCandidateData] = useState({
+    name: '',
+    party: '',
+    age: ''
+  });
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchElections();
+  }, []);
+
+  useEffect(() => {
+    if (selectedElection) {
+      fetchCandidates(selectedElection);
+    } else {
+      setCandidates([]);
+    }
+  }, [selectedElection]);
+
+  const fetchElections = async () => {
+    try {
+      const response = await electionAPI.getElections();
+      setElections(response.data);
+      if (response.data.length > 0) setSelectedElection(response.data[0]._id);
+    } catch (err) {
+      setError('Failed to fetch elections');
+    }
+  };
+
+  const fetchCandidates = async (electionId) => {
+    try {
+      const response = await electionAPI.getElection(electionId);
+      setCandidates(response.data.candidates || []);
+    } catch (err) {
+      setError('Failed to fetch candidates');
+    }
+  };
+
+  const handleChange = (e) => {
+    setCandidateData({
+      ...candidateData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleElectionChange = (e) => {
+    setSelectedElection(e.target.value);
+  };
+
+  const handleAddCandidate = async (e) => {
+    e.preventDefault();
+    if (!selectedElection) {
+      setError('Select an election first');
+      return;
+    }
+    try {
+      await electionAPI.addCandidateToElection(selectedElection, candidateData);
+      fetchCandidates(selectedElection);
+      setCandidateData({ name: '', party: '', age: '' });
+      setError('');
+    } catch (err) {
+      setError('Failed to add candidate');
+    }
+  };
+
+  const handleDelete = async (candidateIndex) => {
+    if (!selectedElection) return;
+    try {
+      await electionAPI.deleteCandidateFromElection(selectedElection, candidateIndex);
+      fetchCandidates(selectedElection);
+    } catch (err) {
+      setError('Failed to delete candidate');
+    }
+  };
+
+  return (
+    <div className="admin-dashboard">
+      <h2>Admin Dashboard</h2>
+      <div>
+        <label htmlFor="electionSelect">Choose an Election:</label>
+        <select
+          id="electionSelect"
+          value={selectedElection}
+          onChange={handleElectionChange}
+        >
+          {elections.map((election) => (
+            <option value={election._id} key={election._id}>{election.title}</option>
+          ))}
+        </select>
+      </div>
+      {selectedElection && (
+        <>
+          <form onSubmit={handleAddCandidate} className="add-candidate-form">
+            <h3>Add a Candidate</h3>
+            {error && <div className="error-message">{error}</div>}
+            <input
+              type="text"
+              name="name"
+              placeholder="Candidate Name"
+              value={candidateData.name}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="text"
+              name="party"
+              placeholder="Party Name"
+              value={candidateData.party}
+              onChange={handleChange}
+              required
+            />
+            <input
+              type="number"
+              name="age"
+              placeholder="Age"
+              value={candidateData.age}
+              onChange={handleChange}
+              required
+            />
+            <button type="submit">Add Candidate</button>
+          </form>
+          <div className="candidate-list">
+            <h3>Candidate List</h3>
+            <ul>
+              {candidates.map((candidate, idx) => (
+                <li key={candidate._id || idx}>
+                  <span>{candidate.name} - {candidate.party}</span>
+                  <button onClick={() => handleDelete(idx)}>Delete</button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default AdminDashboard;
+
+// src/components/VoteResults.js
+import React, { useEffect, useState } from 'react';
+import { electionAPI } from '../services/api';
+import { useParams } from 'react-router-dom';
+
+function VoteResults() {
+  const { electionId } = useParams();
+  const [results, setResults] = useState([]);
+  const [electionTitle, setElectionTitle] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (electionId) {
+      fetchResults(electionId);
+    }
+  }, [electionId]);
+
+  const fetchResults = async (id) => {
+    try {
+      const response = await electionAPI.getElectionResults(id);
+      setResults(response.data.result);
+      setElectionTitle(response.data.electionTitle);
+      setLoading(false);
+    } catch (err) {
+      setError('Failed to fetch vote results');
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div>Loading results...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
+  const totalVotes = results.reduce((sum, result) => sum + result.voteCount, 0);
+
+  return (
+    <div className="vote-results">
+      <h2>Vote Results - {electionTitle}</h2>
+      <div className="results-summary">
+        <p><strong>Total Votes Cast:</strong> {totalVotes}</p>
+      </div>
+      <div className="results-list">
+        {results.map((result, index) => (
+          <div key={index} className="result-item">
+            <div className="result-info">
+              <h3>{result.name} ({result.party})</h3>
+              <div className="vote-count">
+                <span className="votes">{result.voteCount} votes</span>
+                <span className="percentage">
+                  ({totalVotes > 0 ? ((result.voteCount / totalVotes) * 100).toFixed(1) : 0}%)
+                </span>
+              </div>
+            </div>
+            <div className="result-bar">
+              <div
+                className="progress-bar"
+                style={{
+                  width: `${totalVotes > 0 ? (result.voteCount / totalVotes) * 100 : 0}%`
+                }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {results.length === 0 && (
+        <div className="no-results">
+          <p>No votes have been cast yet.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default VoteResults;

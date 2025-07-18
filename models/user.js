@@ -1,18 +1,23 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const Election = require('../models/election');
 const userSchema = new Schema({
-    name: { type: String, required: true },
-    email: { type: String },
+    fullName: { type: String, required: true },
+    email: {
+        type: String,
+        match: /^\S+@\S+\.\S+$/,
+        required: false
+    },
     password: { type: String, required: true },
     address: { type: String, required: true },
-    aadharCardNumber: { type: Number, required: true, unique: true },
-    isVoted: { type: Boolean, default: false },
+    aadharNumber: { type: String, required: true, unique: true, match: /^\d{12}$/ },
+    // isVoted: { type: Boolean, default: false },
+    votedElections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Election' }],
     mobile: { type: String },
     role: {
         type: String,
-        enum: ['voter', 'admin'],
-        default: 'voter'
+        enum: ['user', 'admin'],
+        default: 'user'
     },
     age:{
         type: Number,
