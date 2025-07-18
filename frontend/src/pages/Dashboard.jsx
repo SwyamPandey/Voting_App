@@ -25,7 +25,7 @@ const Dashboard = () => {
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <div className={`w-3 h-3 rounded-full ${user?.role === 'admin' ? 'bg-emerald-400' : 'bg-blue-400'}`}></div>
-                  <span className="text-slate-300 capitalize">{user?.role || 'Voter'}</span>
+                  <span className="text-slate-300 capitalize">{user.role === 'user' ? 'voter': user.role}</span>
                 </div>
                 <span className="text-slate-500">•</span>
                 <span className="text-slate-400">

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from '../../api/axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddCandidate = () => {
   const { electionId } = useParams();
@@ -15,14 +16,18 @@ const AddCandidate = () => {
     e.preventDefault();
     try {
       await axios.post(`/election/${electionId}/candidate`, form);
-      alert('Candidate added');
-      navigate(`/election/${electionId}`);
+      // alert('Candidate added');
+      toast.success('Candidate added successfully!')
+      navigate(`/admin/dashboard`);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to add candidate');
+      // alert(err.response?.data?.error || 'Failed to add candidate');
+      toast.error(err.response?.data?.error || 'Failed to add candidate');
     }
   };
 
   return (
+    <>
+    <Toaster position="top-right" />
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
       <form
         onSubmit={handleSubmit}
@@ -67,6 +72,7 @@ const AddCandidate = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 

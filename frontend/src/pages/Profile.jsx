@@ -17,7 +17,7 @@ const Profile = () => {
               <h3 className="text-white text-xl font-semibold">
                 {user?.fullName || 'Unnamed User'}
               </h3>
-              <p className="capitalize text-slate-400 text-sm">{user?.role || 'voter'}</p>
+              <p className="capitalize text-slate-400 text-sm">{user.role === 'user' ? 'voter': user.role}</p>
             </div>
           </div>
 
@@ -26,7 +26,7 @@ const Profile = () => {
           <p><span className="text-slate-400 font-medium">📍 Address:</span> {user?.address || 'N/A'}</p>
           <p><span className="text-slate-400 font-medium">🆔 Aadhar:</span> {user?.aadharNumber || 'N/A'}</p>
           <p><span className="text-slate-400 font-medium">🎂 Age:</span> {user?.age || 'N/A'}</p>
-          <p><span className="text-slate-400 font-medium">🛡️ Role:</span> {user?.role || 'voter'}</p>
+          <p><span className="text-slate-400 font-medium">🛡️ Role:</span> {user.role === 'user' ? 'voter': user.role}</p>
         </div>
       </div>
     </div>

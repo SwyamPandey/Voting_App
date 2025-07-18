@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from '../../api/axios';
 import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 
 const CreateElection = () => {
   const [form, setForm] = useState({
@@ -19,14 +20,18 @@ const CreateElection = () => {
     e.preventDefault();
     try {
       await axios.post('/election', form);
-      alert('Election created');
+      // alert('Election created');
+      toast.success('Election created');
       navigate('/dashboard');
     } catch (err) {
-      alert(err.response?.data?.error || 'Creation failed');
+      // alert(err.response?.data?.error || 'Creation failed');
+      toast.error(err.response?.data?.error || 'Creation failed');
     }
   };
 
   return (
+    <>
+    <Toaster position='top-right' />
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 flex justify-center items-center">
       <form
         onSubmit={handleSubmit}
@@ -91,6 +96,7 @@ const CreateElection = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 

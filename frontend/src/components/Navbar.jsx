@@ -88,7 +88,7 @@ const Navbar = () => {
                 </div>
                 <div className="text-sm">
                   <p className="text-white font-medium">{user.name || 'User'}</p>
-                  <p className="text-slate-400 text-xs">{user.role || 'Voter'}</p>
+                  <p className="text-slate-400 text-xs">{user.role === 'user' ? 'voter': user.role}</p>
                 </div>
               </div>
               <button 
